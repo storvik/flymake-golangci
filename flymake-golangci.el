@@ -1,11 +1,30 @@
 ;;; flymake-golangci.el -- Flymake checker for golangci linter -*- lexical-binding: t -*-
 
-;; Author: Petter Storvik
+;; Copyright (C) 2024 Petter Storvik
+
+;; Author: Petter Storvik <petterstorvik@gmail.com>
+;; Keywords: linter, tools, go
 ;; URL: https://github.com/storvik/flymake-golangci
 ;; Version: 0.1.0
 ;; Package-Requires: ((emacs "26.1"))
 
 ;;; Commentary:
+
+;; Flymake backend for golangci-lint linter.
+;;
+;; Usage:
+;;
+;; Add backend to go-mode with:
+;;
+;;   (add-hook 'go-mode #'flymake-golangci-load-backend)
+;;
+;; Or if using eglot:
+;;
+;;   (add-hook 'eglot-managed-mode #'flymake-golangci-load-backend)
+;;
+;; Note, this does not enable flymake or eldoc.
+;;
+
 ;;; Code:
 
 (defgroup flymake-golangci nil
