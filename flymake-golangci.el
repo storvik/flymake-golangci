@@ -104,3 +104,6 @@
 ;;;###autoload
 (defun flymake-golangci-load-backend ()
   (add-hook 'flymake-diagnostic-functions 'flymake-golangci nil t))
+
+(provide 'flymake-golangci)
+;;; flymake-golangci.el ends here
