@@ -26,38 +26,62 @@
 
 (defvar flymake-golangci--match-regex "\\(.*\\):\\([0-9]+\\):\\([0-9]+\\): \\(.*\\) \\(([A-Z0-9]+)\\)")
 
-(defun flymake-golangci--check ()
-  "Check buffer using golangci."
+(defvar-local flymake-golangci--proc nil)
+
+(defun flymake-golangci (report-fn &rest _args)
+  "Flymake backend function for golangci-lint, a linter for Go. "
   (unless (executable-find flymake-golangci-executable)
     (error "Cannot find golangci-lint, is it installed?"))
-  (let ((source-buffer (current-buffer))
-        (buffer-content (buffer-substring-no-properties (point-min) (point-max)))
-        (errors '()))
-    (with-temp-buffer
-      (insert buffer-content)
-      ;; TODO: Must combine args and possibly look for a config file here.
-      ;; TODO: Should probably check if this can be done async or something?
-      (apply #'call-process-region (point-min) (point-max) flymake-golangci-executable t t nil '("run"))
-      (goto-char (point-min))
-      (while (search-forward-regexp flymake-golangci--match-regex (point-max) t)
-        (when (match-string 2)
-          (let* ((line (string-to-number (match-string 2)))
-                 (col (string-to-number (match-string 3)))
-                 (msg (match-string 4))
-                 (linter (match-string 5))
-                 (description (format "golangci-lint %s: %s" linter msg))
-                 (region (flymake-diag-region source-buffer line col))
-                 (dx (flymake-make-diagnostic source-buffer (car region) (cdr region)
-                                              :error description)))
-            (add-to-list 'errors dx)))))
-    errors))
+  (when (process-live-p flymake-golangci--proc)
+    (kill-process flymake-golangci--proc))
+  (let ((source (current-buffer)))
+    (save-restriction
+      (widen)
+      ;; Reset the `flymake-golangci--proc' process to a new process
+      (setq
+       flymake-golangci--proc
+       (make-process
+        :name "flymake-golangci" :noquery t :connection-type 'pipe
+        :buffer (generate-new-buffer " *flymake-golangci*")
+        :command `(,flymake-golangci-executable "run")
+        :sentinel
+        (lambda (proc _event)
+          ;; Check that the process has indeed exited, as it might be simply suspended.
+          (when (memq (process-status proc) '(exit signal))
+            (unwind-protect
+                ;; Only proceed if `proc' is the same as `flymake-golangci--proc',
+                ;; which indicates that `proc' is not an obsolete process.
+                (if (with-current-buffer source (eq proc flymake-golangci--proc))
+                    (with-current-buffer (process-buffer proc)
+                      (goto-char (point-min))
+                      ;; Parse the buffer, collect them and call `report-fn'.
+                      (cl-loop
+                       while (search-forward-regexp
+                              flymake-golangci--match-regex
+                              nil t)
+                       for msg = (format "golangci-lint %s: %s"
+                                         (match-string 5)
+                                         (match-string 4))
+                       for (beg . end) = (flymake-diag-region
+                                          source
+                                          (string-to-number (match-string 2))
+                                          (string-to-number (match-string 3)))
+                       when (and beg end)
+                       collect (flymake-make-diagnostic source
+                                                        beg
+                                                        end
+                                                        :error
+                                                        msg)
+                       into diags
+                       finally (funcall report-fn diags)))
+                  (flymake-log :warning "Canceling obsolete check %s"
+                               proc))
+              ;; Cleanup the temporary buffer used to hold the check's output.
+              (kill-buffer (process-buffer proc)))))))
+      ;; Send the buffer contents to the process's stdin, followed by EOF.
+      (process-send-region flymake-golangci--proc (point-min) (point-max))
+      (process-send-eof flymake-golangci--proc))))
 
 ;;;###autoload
-(defun flymake-golangci-load ()
-  "Adds golangci to `flymake-diagnostic-functions'."
-  (interactive)
-  (add-hook 'flymake-diagnostic-functions #'flymake-golangci--run-checker nil t))
-
-(defun flymake-golangci--run-checker (report-fn &rest _args)
-  "Run checker using REPORT-FN."
-  (funcall report-fn (flymake-golangci--check)))
+(defun flymake-golangci-load-backend ()
+  (add-hook 'flymake-diagnostic-functions 'flymake-golangci nil t))
