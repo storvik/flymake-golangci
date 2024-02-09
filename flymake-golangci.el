@@ -62,7 +62,7 @@
        (make-process
         :name "flymake-golangci" :noquery t :connection-type 'pipe
         :buffer (generate-new-buffer " *flymake-golangci*")
-        :command `(,flymake-golangci-executable "run")
+        :command `(,flymake-golangci-executable "run" ,(buffer-file-name source))
         :sentinel
         (lambda (proc _event)
           ;; Check that the process has indeed exited, as it might be simply suspended.

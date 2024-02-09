@@ -10,8 +10,10 @@ I'm using `use-package` and `elpaca` package manager:
 ```emacs-lisp
 (use-package flymake-golangci
   :elpaca (flymake-golangci :host githug :repo "storvik/flymake-golangci")
-  :hook ((eglot-managed-mode . flymake-golangci-load-backend) ;; using flymake-golangci with eglot
-         (go-mode . flymake-golangci-load-backend)))          ;; using flymake-golangci with go-mode
+  :hook ((eglot-managed-mode . (lambda ()
+                                (when (derived-mode-p 'go-mode)
+                                  (flymake-golangci-load-backend)))) ;; using flymake-golangci with eglot
+         (go-mode . flymake-golangci-load-backend)))                 ;; using flymake-golangci with go-mode
 ```
 
 Note that this config does not enable `flymake` or `eldoc` automatically.
