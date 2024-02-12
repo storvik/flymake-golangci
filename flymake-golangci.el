@@ -104,7 +104,16 @@
 
 ;;;###autoload
 (defun flymake-golangci-load-backend ()
+  "Loads golangci into `flymake-diagnostic-functions'."
   (add-hook 'flymake-diagnostic-functions 'flymake-golangci nil t))
+
+;;;###autoload
+(defun flymake-golangci-clear-cache ()
+  "Clear `golangci-lint' cache."
+  (interactive)
+  (unless (executable-find flymake-golangci-executable)
+    (error "Cannot find golangci-lint, is it installed?"))
+  (call-process flymake-golangci-executable nil nil nil "cache" "clean"))
 
 (provide 'flymake-golangci)
 ;;; flymake-golangci.el ends here
