@@ -45,7 +45,9 @@
   :group 'flymake-golangci
   :type '(list string))
 
-(defvar flymake-golangci--match-regex "\\(.*\\):\\([0-9]+\\):\\([0-9]+\\): \\(.*\\) \\(([A-Z0-9]+)\\)")
+(defun flymake-golangci--match-regex (filename)
+  (format "\\(%s\\):\\([0-9]+\\):\\([0-9]+\\): \\(.*\\) \\(([A-Z0-9]+)\\)"
+          filename))
 
 (defvar-local flymake-golangci--proc nil)
 
@@ -55,7 +57,9 @@
     (error "Cannot find golangci-lint, is it installed?"))
   (when (process-live-p flymake-golangci--proc)
     (kill-process flymake-golangci--proc))
-  (let ((source (current-buffer)))
+  (let* ((source (current-buffer))
+         (match-regexp (flymake-golangci--match-regex
+                        (file-name-nondirectory (buffer-file-name source)))))
     (save-restriction
       (widen)
       ;; Reset the `flymake-golangci--proc' process to a new process
@@ -64,6 +68,7 @@
        (make-process
         :name "flymake-golangci" :noquery t :connection-type 'pipe
         :buffer (generate-new-buffer " *flymake-golangci*")
+        ;; Run golangci, no need to pass config file as golangci looks for it
         :command `(,flymake-golangci-executable "run" ,(file-name-directory
                                                         (buffer-file-name source)))
         :sentinel
@@ -79,7 +84,7 @@
                       ;; Parse the buffer, collect them and call `report-fn'.
                       (cl-loop
                        while (search-forward-regexp
-                              flymake-golangci--match-regex
+                              match-regexp
                               nil t)
                        for msg = (format "golangci-lint %s: %s"
                                          (match-string 5)
