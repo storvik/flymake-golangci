@@ -27,6 +27,8 @@
 
 ;;; Code:
 
+(require 'project)
+
 (defgroup flymake-golangci nil
   "Flymake support for golangci."
   :prefix "flymake-golangci-"
@@ -106,6 +108,17 @@
 (defun flymake-golangci-load-backend ()
   "Loads golangci into `flymake-diagnostic-functions'."
   (add-hook 'flymake-diagnostic-functions 'flymake-golangci nil t))
+
+;;;###autoload
+(defun flymake-golangci-lint-project ()
+  "Lint entire project with `golangci-lint'."
+  (interactive)
+  (let ((current-directory (project-current)))
+    (call-process flymake-golangci-executable
+                  nil
+                  (get-buffer-create "*golangci-lint run*")
+                  nil
+                  "run")))
 
 ;;;###autoload
 (defun flymake-golangci-clear-cache ()
