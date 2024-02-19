@@ -5,11 +5,12 @@ My go to Go linter! Pun intended.
 
 ## Installation
 
-I'm using `use-package` and `elpaca` package manager:
+Installation using [straight.el](https://github.com/radian-software/straight.el) or [elpaca](https://github.com/progfolio/elpaca).
 
 ```emacs-lisp
 (use-package flymake-golangci
-  :elpaca (flymake-golangci :host githug :repo "storvik/flymake-golangci")
+  :elpaca (flymake-golangci :host github :repo "storvik/flymake-golangci")             ;; using elpaca
+  :straight (flymake-golangci :type git :host github :repo "storvik/flymake-golangci") ;; using straight
   :hook ((eglot-managed-mode . (lambda ()
                                 (when (derived-mode-p 'go-mode)
                                   (flymake-golangci-load-backend)))) ;; using flymake-golangci with eglot
