@@ -12,9 +12,10 @@ Installation using [straight.el](https://github.com/radian-software/straight.el)
   :elpaca (flymake-golangci :host github :repo "storvik/flymake-golangci")             ;; using elpaca
   :straight (flymake-golangci :type git :host github :repo "storvik/flymake-golangci") ;; using straight
   :hook ((eglot-managed-mode . (lambda ()
-                                (when (derived-mode-p 'go-mode)
+                                (when (derived-mode-p '(go-mode go-ts-mode))
                                   (flymake-golangci-load-backend)))) ;; using flymake-golangci with eglot
-         (go-mode . flymake-golangci-load-backend)))                 ;; using flymake-golangci with go-mode
+         (go-mode . flymake-golangci-load-backend)                   ;; using flymake-golangci with go-mode
+		 (go-ts-mode . flymake-golangci-load-backend)))              ;; using flymake-golangci with go-ts-mode
 ```
 
 Note that this config does not enable `flymake` or `eldoc` automatically.
