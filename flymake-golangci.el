@@ -69,7 +69,7 @@
         :name "flymake-golangci" :noquery t :connection-type 'pipe
         :buffer (generate-new-buffer " *flymake-golangci*")
         ;; Run golangci, no need to pass config file as golangci looks for it
-        :command `(,flymake-golangci-executable "run" ,(file-name-directory
+        :command `(,flymake-golangci-executable "run" ,flymake-golangci-args ,(file-name-directory
                                                         (buffer-file-name source)))
         :sentinel
         (lambda (proc _event)
