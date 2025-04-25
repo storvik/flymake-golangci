@@ -1,11 +1,12 @@
 ;;; flymake-golangci.el -- Flymake checker for golangci linter -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2024 Petter Storvik
+;; Copyright (C) 2025 Vitalii Drevenchuk
 
 ;; Author: Petter Storvik <petterstorvik@gmail.com>
 ;; Keywords: linter, tools, go
 ;; URL: https://github.com/storvik/flymake-golangci
-;; Version: 0.1.0
+;; Version: 0.2.0
 ;; Package-Requires: ((emacs "26.1"))
 
 ;;; Commentary:
