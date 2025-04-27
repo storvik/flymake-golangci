@@ -64,17 +64,17 @@
     (save-restriction
       (widen)
       ;; Reset the `flymake-golangci--proc' process to a new process
-      (setq flymake-exec-args (append `(,flymake-golangci-executable "run")
+      (setq flymake-exec-args (append (list flymake-golangci-executable "run")
                                       flymake-golangci-args
-                                      ,(file-name-directory
-                                                        (buffer-file-name source))))
+                                      (list (file-name-directory
+                                                        (buffer-file-name source)))))
       (setq
        flymake-golangci--proc
        (make-process
         :name "flymake-golangci" :noquery t :connection-type 'pipe
         :buffer (generate-new-buffer " *flymake-golangci*")
         ;; Run golangci, no need to pass config file as golangci looks for it
-        :command flymake-exec-args)
+        :command flymake-exec-args
         :sentinel
         (lambda (proc _event)
           ;; Check that the process has indeed exited, as it might be simply suspended.
