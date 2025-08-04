@@ -1,11 +1,12 @@
 ;;; flymake-golangci.el --- Flymake checker for golangci linter -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2024 Petter Storvik
+;; Copyright (C) 2025 Vitalii Drevenchuk
 
 ;; Author: Petter Storvik <petterstorvik@gmail.com>
 ;; Keywords: linter, tools, go
 ;; URL: https://github.com/storvik/flymake-golangci
-;; Version: 0.1.0
+;; Version: 0.2.0
 ;; Package-Requires: ((emacs "26.1"))
 
 ;;; Commentary:
@@ -63,14 +64,17 @@
     (save-restriction
       (widen)
       ;; Reset the `flymake-golangci--proc' process to a new process
+      (setq flymake-exec-args (append (list flymake-golangci-executable "run")
+                                      flymake-golangci-args
+                                      (list (file-name-directory
+                                                        (buffer-file-name source)))))
       (setq
        flymake-golangci--proc
        (make-process
         :name "flymake-golangci" :noquery t :connection-type 'pipe
         :buffer (generate-new-buffer " *flymake-golangci*")
         ;; Run golangci, no need to pass config file as golangci looks for it
-        :command `(,flymake-golangci-executable "run" ,(file-name-directory
-                                                        (buffer-file-name source)))
+        :command flymake-exec-args
         :sentinel
         (lambda (proc _event)
           ;; Check that the process has indeed exited, as it might be simply suspended.
