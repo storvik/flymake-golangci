@@ -1,4 +1,4 @@
-;;; flymake-golangci.el -- Flymake checker for golangci linter -*- lexical-binding: t -*-
+;;; flymake-golangci.el --- Flymake checker for golangci linter -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2024 Petter Storvik
 
