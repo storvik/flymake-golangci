@@ -46,7 +46,7 @@
   :type '(list string))
 
 (defun flymake-golangci--match-regex (filename)
-  (format "\\(%s\\):\\([0-9]+\\):\\([0-9]+\\): \\(.*\\) \\(([A-Z0-9]+)\\)"
+  (format "\\(%s\\):\\([0-9]+\\):\\([0-9]+\\): \\(.*\\) \\(([a-zA-Z0-9_]+)\\)"
           filename))
 
 (defvar-local flymake-golangci--proc nil)
