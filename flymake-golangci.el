@@ -46,7 +46,7 @@
   :type '(list string))
 
 (defun flymake-golangci--match-regex (filename)
-  (format "\\(%s\\):\\([0-9]+\\):\\([0-9]+\\): \\(.*\\) \\(([A-Z0-9]+)\\)"
+  (format "\\(%s\\):\\([0-9]+\\):\\([0-9]+:\\)? \\(.*\\) \\(([a-zA-Z0-9_]+)\\)"
           filename))
 
 (defvar-local flymake-golangci--proc nil)
@@ -92,7 +92,7 @@
                        for (beg . end) = (flymake-diag-region
                                           source
                                           (string-to-number (match-string 2))
-                                          (string-to-number (match-string 3)))
+                                          (string-to-number (or (match-string 3) "0")))
                        when (and beg end)
                        collect (flymake-make-diagnostic source
                                                         beg
@@ -104,10 +104,10 @@
                   (flymake-log :warning "Canceling obsolete check %s"
                                proc))
               ;; Cleanup the temporary buffer used to hold the check's output.
-              (kill-buffer (process-buffer proc)))))))
-      ;; Send the buffer contents to the process's stdin, followed by EOF.
-      (process-send-region flymake-golangci--proc (point-min) (point-max))
-      (process-send-eof flymake-golangci--proc))))
+              (kill-buffer (process-buffer proc))))))))))
+;; Send the buffer contents to the process's stdin, followed by EOF.
+;;(process-send-region flymake-golangci--proc (point-min) (point-max))
+;;(process-send-eof flymake-golangci--proc))))
 
 ;;;###autoload
 (defun flymake-golangci-load-backend ()
